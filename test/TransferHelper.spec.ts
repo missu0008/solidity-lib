@@ -1,6 +1,7 @@
-import chai, {expect} from 'chai'
-import {Contract, constants} from 'ethers'
-import {solidity, MockProvider, deployContract} from 'ethereum-waffle'
+import chai, { expect } from 'chai'
+import { Contract } from 'ethers'
+import { solidity, MockProvider, deployContract } from 'ethereum-waffle'
+import { AddressZero, MaxUint256 } from 'ethers/constants'
 
 import TransferHelperTest from '../build/TransferHelperTest.json'
 import FakeFallback from '../build/TransferHelperTestFakeFallback.json'
@@ -15,11 +16,9 @@ const overrides = {
 
 describe('TransferHelper', () => {
   const provider = new MockProvider({
-    ganacheOptions: {
-      hardfork: 'istanbul',
-      mnemonic: 'horn horn horn horn horn horn horn horn horn horn horn horn',
-      gasLimit: 9999999,
-    },
+    hardfork: 'istanbul',
+    mnemonic: 'horn horn horn horn horn horn horn horn horn horn horn horn',
+    gasLimit: 9999999,
   })
   const [wallet] = provider.getWallets()
 
@@ -35,7 +34,13 @@ describe('TransferHelper', () => {
   })
 
   // sets up the fixtures for each token situation that should be tested
-  function harness({sendTx, expectedError}: {sendTx: (tokenAddress: string) => Promise<void>; expectedError: string}) {
+  function harness({
+    sendTx,
+    expectedError,
+  }: {
+    sendTx: (tokenAddress: string) => Promise<void>
+    expectedError: string
+  }) {
     it('succeeds with compliant with no revert and true return', async () => {
       await fakeCompliant.setup(true, false)
       await sendTx(fakeCompliant.address)
@@ -60,26 +65,20 @@ describe('TransferHelper', () => {
 
   describe('#safeApprove', () => {
     harness({
-      sendTx: (tokenAddress) => transferHelper.safeApprove(tokenAddress, constants.AddressZero, constants.MaxUint256),
-      expectedError: 'TransferHelper::safeApprove: approve failed',
+      sendTx: (tokenAddress) => transferHelper.safeApprove(tokenAddress, AddressZero, MaxUint256),
+      expectedError: 'TransferHelper: APPROVE_FAILED',
     })
   })
   describe('#safeTransfer', () => {
     harness({
-      sendTx: (tokenAddress) => transferHelper.safeTransfer(tokenAddress, constants.AddressZero, constants.MaxUint256),
-      expectedError: 'TransferHelper::safeTransfer: transfer failed',
+      sendTx: (tokenAddress) => transferHelper.safeTransfer(tokenAddress, AddressZero, MaxUint256),
+      expectedError: 'TransferHelper: TRANSFER_FAILED',
     })
   })
   describe('#safeTransferFrom', () => {
     harness({
-      sendTx: (tokenAddress) =>
-        transferHelper.safeTransferFrom(
-          tokenAddress,
-          constants.AddressZero,
-          constants.AddressZero,
-          constants.MaxUint256
-        ),
-      expectedError: 'TransferHelper::transferFrom: transferFrom failed',
+      sendTx: (tokenAddress) => transferHelper.safeTransferFrom(tokenAddress, AddressZero, AddressZero, MaxUint256),
+      expectedError: 'TransferHelper: TRANSFER_FROM_FAILED',
     })
   })
 
@@ -91,7 +90,7 @@ describe('TransferHelper', () => {
     it('fails if call reverts', async () => {
       await fakeFallback.setup(true)
       await expect(transferHelper.safeTransferETH(fakeFallback.address, 0)).to.be.revertedWith(
-        'TransferHelper::safeTransferETH: ETH transfer failed'
+        'TransferHelper: ETH_TRANSFER_FAILED'
       )
     })
   })

@@ -1,37 +1,22 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
-
 pragma solidity >=0.6.0;
 
 import '../libraries/TransferHelper.sol';
 
 // test helper for transfers
 contract TransferHelperTest {
-    function safeApprove(
-        address token,
-        address to,
-        uint256 value
-    ) external {
+    function safeApprove(address token, address to, uint value) external {
         TransferHelper.safeApprove(token, to, value);
     }
 
-    function safeTransfer(
-        address token,
-        address to,
-        uint256 value
-    ) external {
+    function safeTransfer(address token, address to, uint value) external {
         TransferHelper.safeTransfer(token, to, value);
     }
 
-    function safeTransferFrom(
-        address token,
-        address from,
-        address to,
-        uint256 value
-    ) external {
+    function safeTransferFrom(address token, address from, address to, uint value) external {
         TransferHelper.safeTransferFrom(token, from, to, value);
     }
 
-    function safeTransferETH(address to, uint256 value) external {
+    function safeTransferETH(address to, uint value) external {
         TransferHelper.safeTransferETH(to, value);
     }
 }
@@ -41,26 +26,22 @@ contract TransferHelperTestFakeERC20Compliant {
     bool public success;
     bool public shouldRevert;
 
-    function setup(bool success_, bool shouldRevert_) external {
+    function setup(bool success_, bool shouldRevert_) public {
         success = success_;
         shouldRevert = shouldRevert_;
     }
 
-    function transfer(address, uint256) external view returns (bool) {
+    function transfer(address, uint256) public view returns (bool) {
         require(!shouldRevert, 'REVERT');
         return success;
     }
 
-    function transferFrom(
-        address,
-        address,
-        uint256
-    ) external view returns (bool) {
+    function transferFrom(address, address, uint256) public view returns (bool) {
         require(!shouldRevert, 'REVERT');
         return success;
     }
 
-    function approve(address, uint256) external view returns (bool) {
+    function approve(address, uint256) public view returns (bool) {
         require(!shouldRevert, 'REVERT');
         return success;
     }
@@ -70,23 +51,19 @@ contract TransferHelperTestFakeERC20Compliant {
 contract TransferHelperTestFakeERC20Noncompliant {
     bool public shouldRevert;
 
-    function setup(bool shouldRevert_) external {
+    function setup(bool shouldRevert_) public {
         shouldRevert = shouldRevert_;
     }
 
-    function transfer(address, uint256) external view {
+    function transfer(address, uint256) view public {
         require(!shouldRevert);
     }
 
-    function transferFrom(
-        address,
-        address,
-        uint256
-    ) external view {
+    function transferFrom(address, address, uint256) view public {
         require(!shouldRevert);
     }
 
-    function approve(address, uint256) external view {
+    function approve(address, uint256) view public {
         require(!shouldRevert);
     }
 }
@@ -94,15 +71,12 @@ contract TransferHelperTestFakeERC20Noncompliant {
 contract TransferHelperTestFakeFallback {
     bool public shouldRevert;
 
-    function setup(bool shouldRevert_) external {
+    function setup(bool shouldRevert_) public {
         shouldRevert = shouldRevert_;
     }
 
     receive() external payable {
         require(!shouldRevert);
     }
-
-    function withdraw() external {
-        msg.sender.transfer(address(this).balance);
-    }
 }
+
